@@ -14,15 +14,15 @@
        forms
        (recur (conj forms form) reader)))))
 
-(defn nice-syntax-error
+(defn format-syntax-error
   "Rewrites clojure.lang.LispReader$ReaderException to have error messages that
   might actually help someone."
-  ([e] (nice-syntax-error e "(no file)"))
+  ([e] (format-syntax-error e "(no file)"))
   ([e file]
    ; Lord help me.
    (let [line (wall.hack/field (class e) :line e)
          msg (.getMessage (or (.getCause e) e))]
-    (RuntimeException. (str "Syntax error (" file ":" line ") " msg)))))
+    (str "(" file ":" line ") " msg))))
 
 (defn validate-config
   "Check that a config file has valid syntax."
@@ -30,7 +30,7 @@
   (try
     (read-strings (slurp file))
     (catch clojure.lang.LispReader$ReaderException e
-      (prn (nice-syntax-error e file)))))
+      (println (format-syntax-error e file)))))
 
 (defn -main
   [& args]
